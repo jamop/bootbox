@@ -1,6 +1,6 @@
 {
-  "name": "bootbox.js",
-  "main": "./bootbox.js",
+  "name": "bootbox-semantic.js",
+  "main": "./bootbox-semantic.js",
   "ignore": [
     "CHANGELOG.md",
     "CONTRIBUTING",

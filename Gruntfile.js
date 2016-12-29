@@ -6,7 +6,7 @@ module.exports = function(grunt) {
       },
       build: {
         files: {
-          "bootbox.min.js": ["bootbox.js"]
+          "bootbox-semantic.min.js": ["bootbox-semantic.js"]
         }
       }
     },
@@ -15,7 +15,7 @@ module.exports = function(grunt) {
       options: {
         jshintrc: ".jshintrc"
       },
-      all: ["bootbox.js"]
+      all: ["bootbox-semantic.js"]
     },
 
     karma: {

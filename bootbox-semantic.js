@@ -1,5 +1,5 @@
 /**
- * bootbox.js [master branch]
+ * bootbox-semantic.js [semantic branch]
  *
  * http://bootboxjs.com/license.txt
  */
@@ -35,48 +35,47 @@
   // the base DOM structure needed to create a modal
   var templates = {
     dialog:
-      "<div class='bootbox modal' tabindex='-1' role='dialog' aria-hidden='true'>" +
-        "<div class='modal-dialog'>" +
-          "<div class='modal-content'>" +
-            "<div class='modal-body'><div class='bootbox-body'></div></div>" +
-          "</div>" +
+      "<div class='bootbox ui modal' tabindex='-1' role='dialog'>" +
+        "<div class='content'>" +
         "</div>" +
       "</div>",
     header:
-      "<div class='modal-header'>" +
-        "<h4 class='modal-title'></h4>" +
+      "<div class='header'>" +
+      "<div class='title'></div>" +
       "</div>",
     footer:
-      "<div class='modal-footer'></div>",
+      "<div class='actions'></div>",
     closeButton:
-      "<button type='button' class='bootbox-close-button close' aria-hidden='true'>&times;</button>",
+      "<a class='ui right corner label bootbox-close-button'>" +
+      "<i class='close icon'></i>" +
+      "</a>",
     form:
-      "<form class='bootbox-form'></form>",
+      "<form class='bootbox-form ui form'></form>",
     inputs: {
       text:
-        "<input class='bootbox-input bootbox-input-text form-control' autocomplete=off type=text />",
+        "<input class='bootbox-input bootbox-input-text' autocomplete=off type=text />",
       textarea:
-        "<textarea class='bootbox-input bootbox-input-textarea form-control'></textarea>",
+        "<textarea class='bootbox-input bootbox-input-textarea'></textarea>",
       email:
-        "<input class='bootbox-input bootbox-input-email form-control' autocomplete='off' type='email' />",
+        "<input class='bootbox-input bootbox-input-email' autocomplete='off' type='email' />",
       select:
-        "<select class='bootbox-input bootbox-input-select form-control'></select>",
+        "<select class='bootbox-input bootbox-input-select'></select>",
       checkbox:
         "<div class='checkbox'><label><input class='bootbox-input bootbox-input-checkbox' type='checkbox' /></label></div>",
       date:
-        "<input class='bootbox-input bootbox-input-date form-control' autocomplete=off type='date' />",
+        "<input class='bootbox-input bootbox-input-date' autocomplete=off type='date' />",
       time:
-        "<input class='bootbox-input bootbox-input-time form-control' autocomplete=off type='time' />",
+        "<input class='bootbox-input bootbox-input-time' autocomplete=off type='time' />",
       number:
-        "<input class='bootbox-input bootbox-input-number form-control' autocomplete=off type='number' />",
+        "<input class='bootbox-input bootbox-input-number' autocomplete=off type='number' />",
       password:
-        "<input class='bootbox-input bootbox-input-password form-control' autocomplete='off' type='password' />"
+        "<input class='bootbox-input bootbox-input-password' autocomplete='off' type='password' />"
     }
   };
 
   var defaults = {
     // default language
-    locale: "en",
+    locale: "zh_CN",
     // show backdrop or not. Default to static so user has to interact with dialog
     backdrop: "static",
     // animate the modal in/out
@@ -195,9 +194,9 @@
       if (!button.className) {
         if (total <= 2 && isLast) {
           // always add a primary to the main option in a one or two-button dialog
-          button.className = "btn-primary";
+          button.className = "ui positive button";
         } else {
-          button.className = "btn-default";
+          button.className = "ui basic button";
         }
       }
     });
@@ -218,11 +217,14 @@
     var argn = args.length;
     var options = {};
 
-    if (argn < 1 || argn > 2) {
+    if (argn < 1 || argn > 3) {
       throw new Error("Invalid argument length");
     }
-
-    if (argn === 2 || typeof args[0] === "string") {
+    if (argn === 3 || (typeof args[0] === "string" && typeof args[1] === "string")) {
+        options[properties[0]] = args[0];
+        options[properties[1]] = args[1];
+        options[properties[2]] = args[2];
+    } else if (argn === 2 || typeof args[0] === "string") {
       options[properties[0]] = args[0];
       options[properties[1]] = args[1];
     } else {
@@ -316,7 +318,7 @@
   exports.alert = function() {
     var options;
 
-    options = mergeDialogOptions("alert", ["ok"], ["message", "callback"], arguments);
+    options = mergeDialogOptions("alert", ["ok"], ["title", "message", "callback"], arguments);
 
     // @TODO: can this move inside exports.dialog when we're iterating over each
     // button and checking its button.callback value instead?
@@ -335,13 +337,15 @@
       return true;
     };
 
+    options.size = "small";
+
     return exports.dialog(options);
   };
 
   exports.confirm = function() {
     var options;
 
-    options = mergeDialogOptions("confirm", ["cancel", "confirm"], ["message", "callback"], arguments);
+    options = mergeDialogOptions("confirm", ["cancel", "confirm"], ["title", "message", "callback"], arguments);
 
     // confirm specific validation; they don't make sense without a callback so make
     // sure it's present
@@ -359,6 +363,8 @@
     options.buttons.confirm.callback = function() {
       return options.callback.call(this, true);
     };
+
+    options.size = "small";
 
     return exports.dialog(options);
   };
@@ -553,7 +559,7 @@
       e.stopPropagation();
       // @TODO can we actually click *the* button object instead?
       // e.g. buttons.confirm.click() or similar
-      dialog.find(".btn-primary").click();
+      dialog.find(".ui.positive.button").click();
     });
 
     dialog = exports.dialog(options);
@@ -562,7 +568,7 @@
     dialog.off("shown.bs.modal");
 
     // ...and replace it with one focusing our input, if possible
-    dialog.on("shown.bs.modal", function() {
+    dialog.on("shown.bs.modal", function () {
       // need the closure here since input isn't
       // an object otherwise
       input.focus();
@@ -579,8 +585,7 @@
     options = sanitize(options);
 
     var dialog = $(templates.dialog);
-    var innerDialog = dialog.find(".modal-dialog");
-    var body = dialog.find(".modal-body");
+    var body = dialog.find(".content");
     var buttons = options.buttons;
     var buttonStr = "";
     var callbacks = {
@@ -600,11 +605,11 @@
       // @TODO I don't like this string appending to itself; bit dirty. Needs reworking
       // can we just build up button elements instead? slower but neater. Then button
       // can just become a template too
-      buttonStr += "<button data-bb-handler='" + key + "' type='button' class='btn " + button.className + "'>" + button.label + "</button>";
+      buttonStr += "<button data-bb-handler='" + key + "' type='button' class='" + button.className + "'>" + button.label + "</button>";
       callbacks[key] = button.callback;
     });
 
-    body.find(".bootbox-body").html(options.message);
+    body.html(options.message);
 
     if (options.animate === true) {
       dialog.addClass("fade");
@@ -615,9 +620,9 @@
     }
 
     if (options.size === "large") {
-      innerDialog.addClass("modal-lg");
+      dialog.addClass("large");
     } else if (options.size === "small") {
-      innerDialog.addClass("modal-sm");
+      dialog.addClass("small");
     }
 
     if (options.title) {
@@ -628,19 +633,19 @@
       var closeButton = $(templates.closeButton);
 
       if (options.title) {
-        dialog.find(".modal-header").prepend(closeButton);
+        dialog.find(".title").after(closeButton);
       } else {
         closeButton.css("margin-top", "-2px").prependTo(body);
       }
     }
 
     if (options.title) {
-      dialog.find(".modal-title").html(options.title);
+      dialog.find(".title").html(options.title);
     }
 
     if (buttonStr.length) {
       body.after(templates.footer);
-      dialog.find(".modal-footer").html(buttonStr);
+      dialog.find(".actions").html(buttonStr);
     }
 
 
@@ -677,7 +682,7 @@
     */
 
     dialog.one("shown.bs.modal", function() {
-      dialog.find(".btn-primary:first").focus();
+      dialog.find(".ui.positive.button:first").focus();
     });
 
     /**
@@ -723,7 +728,7 @@
      * interaction with our dialog
      */
 
-    dialog.on("click", ".modal-footer button", function(e) {
+    dialog.on("click", ".actions .button", function(e) {
       var callbackKey = $(this).data("bb-handler");
 
       processCallback(e, dialog, callbacks[callbackKey]);
